@@ -14,22 +14,45 @@ import java.net.URL;
 
 public class FxmlUtil {
 
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxml) {
-        return loadFxml(fxml, new Stage(), new FXMLLoader());
+    private static Class<?> cls;
+
+    public static void initClass(Class<?> cls) {
+        FxmlUtil.cls = cls;
     }
 
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxml, Stage stage) {
-        return loadFxml(fxml, stage, new FXMLLoader());
+    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath) {
+        return loadFxml(fxmlPath, new Stage(), new FXMLLoader());
     }
 
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxml, Stage stage, FXMLLoader fxmlLoader) {
-        URL url = FxmlUtil.class.getResource(fxml);
+    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath, Stage stage) {
+        return loadFxml(fxmlPath, stage, new FXMLLoader());
+    }
+
+    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath, Stage stage, FXMLLoader fxmlLoader) {
+        if (cls == null) {
+            throw new NullPointerException("invoke initClass to set class first");
+        }
+        return loadFxml(cls.getResource(fxmlPath), stage, fxmlLoader);
+    }
+
+    public static <T extends BaseController> StageHolder<T> loadFxml(URL url) {
+        return loadFxml(url, new Stage(), new FXMLLoader());
+    }
+
+    public static <T extends BaseController> StageHolder<T> loadFxml(URL url, Stage stage) {
+        return loadFxml(url, stage, new FXMLLoader());
+    }
+
+    public static <T extends BaseController> StageHolder<T> loadFxml(URL url, Stage stage, FXMLLoader fxmlLoader) {
         fxmlLoader.setLocation(url);
         Parent root = null;
         try {
             root = fxmlLoader.load();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (root == null) {
+            return null;
         }
         if (root instanceof Region) {
             Region region = (Region) root;

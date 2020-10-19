@@ -10,29 +10,27 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class FxmlUtil {
 
-    private static Class<?> cls;
-
-    public static void initClass(Class<?> cls) {
-        FxmlUtil.cls = cls;
+    public static <T extends BaseController> StageHolder<T> loadFxml(String path) {
+        return loadFxml(path, new Stage(), new FXMLLoader());
     }
 
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath) {
-        return loadFxml(fxmlPath, new Stage(), new FXMLLoader());
+    public static <T extends BaseController> StageHolder<T> loadFxml(String path, Stage stage) {
+        return loadFxml(path, stage, new FXMLLoader());
     }
 
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath, Stage stage) {
-        return loadFxml(fxmlPath, stage, new FXMLLoader());
-    }
-
-    public static <T extends BaseController> StageHolder<T> loadFxml(String fxmlPath, Stage stage, FXMLLoader fxmlLoader) {
-        if (cls == null) {
-            throw new NullPointerException("invoke initClass to set class first");
+    public static <T extends BaseController> StageHolder<T> loadFxml(String path, Stage stage, FXMLLoader fxmlLoader) {
+        URL url = null;
+        try {
+            url = new URL(path);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-        return loadFxml(cls.getResource(fxmlPath), stage, fxmlLoader);
+        return loadFxml(url, stage, fxmlLoader);
     }
 
     public static <T extends BaseController> StageHolder<T> loadFxml(URL url) {

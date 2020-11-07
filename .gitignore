@@ -29,3 +29,4 @@ hs_err_pid*
 /target/test-classes/META-INF/jpms.args
 /target/maven-archiver/pom.properties
 /target/surefire-reports/TEST-com.xingray.javafx.ResourceTest.xml
+/.idea/uiDesigner.xml

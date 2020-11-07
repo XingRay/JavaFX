@@ -21,12 +21,5 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-/target/surefire-reports/com.xingray.javafx.ResourceTest.txt
-/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
-/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
-/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
-/target/test-classes/META-INF/jpms.args
-/target/maven-archiver/pom.properties
-/target/surefire-reports/TEST-com.xingray.javafx.ResourceTest.xml
-/.idea/uiDesigner.xml
+/target/*
+/.idea/*

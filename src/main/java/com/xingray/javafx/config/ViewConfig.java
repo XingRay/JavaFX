@@ -125,6 +125,9 @@ public class ViewConfig<T> {
                 Class cls = entry.getKey();
                 if (cls.isInstance(viewField)) {
                     viewState = entry.getValue();
+                    if (viewState != null) {
+                        viewStates.put(cls, viewState);
+                    }
                     break;
                 }
             }

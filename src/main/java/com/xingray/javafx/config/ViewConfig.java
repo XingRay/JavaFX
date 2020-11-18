@@ -1,6 +1,10 @@
 package com.xingray.javafx.config;
 
+import com.xingray.javafx.config.viewstates.DatePickerViewState;
+import com.xingray.javafx.config.viewstates.TextInputControlViewState;
 import com.xingray.javafx.util.ReflectUtil;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextInputControl;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -13,14 +17,18 @@ public class ViewConfig<T> {
     private final Object controller;
     private final Class<T> configClass;
     private Map<String, Field> controllerViewFields;
-    private final ViewState viewState;
+    private final Map<Class, ViewState> viewStates;
 
-    public ViewConfig(Object controller, Class<T> configClass, ViewState viewState) {
+    public ViewConfig(Object controller, Class<T> configClass) {
         this.controller = controller;
         this.configClass = configClass;
-        this.viewState = viewState;
+        this.viewStates = new HashMap<>();
 
         init();
+    }
+
+    public <V, S> void addViewState(Class<V> viewCls, ViewState<V, S> viewState) {
+        viewStates.put(viewCls, viewState);
     }
 
     private void init() {
@@ -34,6 +42,9 @@ public class ViewConfig<T> {
             String configKey = configKeyAnnotation.value();
             controllerViewFields.put(configKey, field);
         }
+
+        addViewState(TextInputControl.class, new TextInputControlViewState());
+        addViewState(DatePicker.class, new DatePickerViewState());
     }
 
     public T getConfig() {
@@ -64,8 +75,14 @@ public class ViewConfig<T> {
             Field field = controllerViewFields.get(name);
             try {
                 Object viewField = field.get(controller);
-                String value = viewState.getViewState(viewField);
-                ReflectUtil.set(config, name, value);
+                ViewState viewState = getViewState(viewField);
+                if (viewState != null) {
+                    Object value = viewState.getViewState(viewField);
+                    ReflectUtil.set(config, name, value);
+                } else {
+                    Object value = viewField;
+                    ReflectUtil.set(config, name, value);
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -88,11 +105,30 @@ public class ViewConfig<T> {
             Field field = controllerViewFields.get(name);
             try {
                 Object viewField = field.get(controller);
-                String value = (String) ReflectUtil.get(config, name);
-                viewState.setViewState(viewField, value);
+                Object value = ReflectUtil.get(config, name);
+                ViewState viewState = getViewState(viewField);
+                if (viewState != null) {
+                    viewState.setViewState(viewField, value);
+                } else {
+                    field.set(controller, value);
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private ViewState getViewState(Object viewField) {
+        ViewState viewState = viewStates.get(viewField.getClass());
+        if (viewState == null) {
+            for (Map.Entry<Class, ViewState> entry : viewStates.entrySet()) {
+                Class cls = entry.getKey();
+                if (cls.isInstance(viewField)) {
+                    viewState = entry.getValue();
+                    break;
+                }
+            }
+        }
+        return viewState;
     }
 }

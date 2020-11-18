@@ -1,7 +1,7 @@
 package com.xingray.javafx.config;
 
-public interface ViewState {
-    String getViewState(Object view);
+public interface ViewState<T, S> {
+    S getViewState(T view);
 
-    void setViewState(Object view, String state);
+    void setViewState(T view, S state);
 }

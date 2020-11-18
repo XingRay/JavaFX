@@ -1,7 +1,6 @@
-package com.xingray.javafx.util;
+package com.xingray.javafx.page;
 
 
-import com.xingray.javafx.annotations.LayoutPath;
 import com.xingray.javafx.base.BaseController;
 import com.xingray.javafx.base.StageHolder;
 import javafx.fxml.FXMLLoader;

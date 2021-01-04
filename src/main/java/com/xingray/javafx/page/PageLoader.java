@@ -104,7 +104,7 @@ public class PageLoader {
         if (controller != null) {
             controller.setScene(scene);
             controller.setStage(stage);
-            controller.onCreated();
+            controller.create();
         }
         return new StageHolder<>(controller, stage, scene);
     }

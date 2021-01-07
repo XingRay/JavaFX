@@ -5,6 +5,8 @@ import com.xingray.javafx.config.fieldconverters.FieldConverters;
 import com.xingray.util.TaskExecutor;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
@@ -49,6 +51,8 @@ public abstract class BaseController {
         autoConfig = new AutoConfig(this, TaskExecutor.ioPool(), TaskExecutor.uiPool());
         autoConfig.addFieldConverter(TextInputControl.class, FieldConverters.textInputControlConverter);
         autoConfig.addFieldConverter(DatePicker.class, FieldConverters.datePickerConverter);
+        autoConfig.addFieldConverter(ChoiceBox.class, FieldConverters.choiceBoxConverter);
+        autoConfig.addFieldConverter(CheckBox.class, FieldConverters.checkBoxConverter);
         autoConfig.restore();
     }
 

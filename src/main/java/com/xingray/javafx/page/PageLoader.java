@@ -48,7 +48,7 @@ public class PageLoader {
         return url;
     }
 
-    private <T extends BaseController> String getLayoutPath(Class<T> cls) {
+    public static String getLayoutPath(Class<?> cls) {
         LayoutPath layoutPathAnnotation = cls.getAnnotation(LayoutPath.class);
         if (layoutPathAnnotation == null) {
             throw new IllegalArgumentException("class:" + cls.getName() + " is annotationed by " + LayoutPath.class.getName());

@@ -9,12 +9,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextInputControl;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public abstract class BaseController {
 
-    protected Stage stage;
+    protected BaseStage stage;
     protected Scene scene;
     private AutoConfig autoConfig;
 
@@ -22,7 +21,7 @@ public abstract class BaseController {
     }
 
     public void create() {
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+        stage.addOnCloseEventHandler(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
                 destroy();
@@ -57,11 +56,11 @@ public abstract class BaseController {
     }
 
 
-    public Stage getStage() {
+    public BaseStage getStage() {
         return stage;
     }
 
-    public void setStage(Stage stage) {
+    public void setStage(BaseStage stage) {
         this.stage = stage;
     }
 
@@ -72,6 +71,4 @@ public abstract class BaseController {
     public void setScene(Scene scene) {
         this.scene = scene;
     }
-
-
 }

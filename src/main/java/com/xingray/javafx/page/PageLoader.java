@@ -2,10 +2,13 @@ package com.xingray.javafx.page;
 
 
 import com.xingray.javafx.base.BaseController;
+import com.xingray.javafx.base.BaseStage;
+import com.xingray.javafx.base.FrameHolder;
 import com.xingray.javafx.base.StageHolder;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
@@ -57,26 +60,26 @@ public class PageLoader {
     }
 
     public <T extends BaseController> StageHolder<T> loadFxml(String path) {
-        return loadFxml(path, new Stage(), new FXMLLoader());
+        return loadFxml(path, new BaseStage(), new FXMLLoader());
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(String path, Stage stage) {
+    public <T extends BaseController> StageHolder<T> loadFxml(String path, BaseStage stage) {
         return loadFxml(path, stage, new FXMLLoader());
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(String path, Stage stage, FXMLLoader fxmlLoader) {
+    public <T extends BaseController> StageHolder<T> loadFxml(String path, BaseStage stage, FXMLLoader fxmlLoader) {
         return loadFxml(getUrl(path), stage, fxmlLoader);
     }
 
     public <T extends BaseController> StageHolder<T> loadFxml(URL url) {
-        return loadFxml(url, new Stage(), new FXMLLoader());
+        return loadFxml(url, new BaseStage(), new FXMLLoader());
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(URL url, Stage stage) {
+    public <T extends BaseController> StageHolder<T> loadFxml(URL url, BaseStage stage) {
         return loadFxml(url, stage, new FXMLLoader());
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(URL url, Stage stage, FXMLLoader fxmlLoader) {
+    public <T extends BaseController> StageHolder<T> loadFxml(URL url, BaseStage stage, FXMLLoader fxmlLoader) {
         fxmlLoader.setLocation(url);
         Parent root = null;
         try {
@@ -109,15 +112,42 @@ public class PageLoader {
         return new StageHolder<>(controller, stage, scene);
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(Class<T> cls, Stage stage, FXMLLoader fxmlLoader) {
+    public <T extends BaseController> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage, FXMLLoader fxmlLoader) {
         return loadFxml(getLayoutPath(cls), stage, fxmlLoader);
     }
 
-    public <T extends BaseController> StageHolder<T> loadFxml(Class<T> cls, Stage stage) {
+    public <T extends BaseController> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage) {
         return loadFxml(cls, stage, new FXMLLoader());
     }
 
     public <T extends BaseController> StageHolder<T> loadFxml(Class<T> cls) {
-        return loadFxml(cls, new Stage(), new FXMLLoader());
+        return loadFxml(cls, new BaseStage(), new FXMLLoader());
+    }
+
+    public <T extends BaseController> FrameHolder<T> loadFrame(BaseStage stage, Pane root, Class<T> cls) {
+        URL resource = getUrl(getLayoutPath(cls));
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(resource);
+        Parent frame = null;
+        try {
+            frame = fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (frame == null) {
+            return null;
+        }
+
+        root.getChildren().clear();
+        root.getChildren().add(frame);
+
+        T controller = fxmlLoader.getController();
+        if (controller != null) {
+            controller.setScene(root.getScene());
+            controller.setStage(stage);
+            controller.create();
+        }
+
+        return new FrameHolder<>(controller, stage, root.getScene());
     }
 }

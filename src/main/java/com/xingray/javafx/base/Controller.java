@@ -32,7 +32,8 @@ public abstract class Controller {
     private AutoConfig autoConfig;
     private Map<String, PageTask> pageRouteMap;
     private Controller parent;
-    private Object[] pageParams;
+    private Map<Pane, Map<Class<? extends Controller>, FrameHolder>> frameHolderMap;
+    private Map<Pane, FrameHolder> currentFrameHolderMap;
 
     private Function<String, URL> urlMapper;
 
@@ -43,16 +44,23 @@ public abstract class Controller {
         stage.addOnCloseEventHandler(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
+                hide();
                 destroy();
             }
         });
         pageRouteMap = new HashMap<>();
+        frameHolderMap = new HashMap<>();
+        currentFrameHolderMap = new HashMap<>();
 
         onCreated();
     }
 
-    public void onCreated() {
+    protected void show() {
+        onShow();
+    }
 
+    protected void hide() {
+        onHide();
     }
 
     private void destroy() {
@@ -60,6 +68,22 @@ public abstract class Controller {
             autoConfig.save();
         }
         onDestroy();
+    }
+
+    public void onCreated() {
+
+    }
+
+    public void onShow() {
+
+    }
+
+    public void onCommand(Object[] args) {
+
+    }
+
+    public void onHide() {
+
     }
 
     public void onDestroy() {
@@ -100,14 +124,6 @@ public abstract class Controller {
         this.parent = parent;
     }
 
-    public Object[] getPageParams() {
-        return pageParams;
-    }
-
-    public void setPageParams(Object[] pageParams) {
-        this.pageParams = pageParams;
-    }
-
     public void setUrlMapper(Function<String, URL> urlMapper) {
         this.urlMapper = urlMapper;
     }
@@ -131,8 +147,9 @@ public abstract class Controller {
 
         if (urlMapper != null) {
             StageHolder<? extends Controller> holder = loadFxml(cls);
-            holder.getController().setPageParams(args);
             holder.getStage().show();
+            holder.getController().show();
+            holder.getController().onCommand(args);
             return true;
         }
 
@@ -152,11 +169,11 @@ public abstract class Controller {
     }
 
     public <T extends Controller> StageHolder<T> loadFxml(String path) {
-        return loadFxml(path, new BaseStage(), new FXMLLoader());
+        return loadFxml(getUrl(path), new BaseStage(), new FXMLLoader());
     }
 
     public <T extends Controller> StageHolder<T> loadFxml(String path, BaseStage stage) {
-        return loadFxml(path, stage, new FXMLLoader());
+        return loadFxml(getUrl(path), stage, new FXMLLoader());
     }
 
     public <T extends Controller> StageHolder<T> loadFxml(String path, BaseStage stage, FXMLLoader fxmlLoader) {
@@ -169,6 +186,18 @@ public abstract class Controller {
 
     public <T extends Controller> StageHolder<T> loadFxml(URL url, BaseStage stage) {
         return loadFxml(url, stage, new FXMLLoader());
+    }
+
+    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage, FXMLLoader fxmlLoader) {
+        return loadFxml(getUrl(PageUtil.getLayoutPath(cls)), stage, fxmlLoader);
+    }
+
+    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage) {
+        return loadFxml(getUrl(PageUtil.getLayoutPath(cls)), stage, new FXMLLoader());
+    }
+
+    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls) {
+        return loadFxml(getUrl(PageUtil.getLayoutPath(cls)), new BaseStage(), new FXMLLoader());
     }
 
     public <T extends Controller> StageHolder<T> loadFxml(URL url, BaseStage stage, FXMLLoader fxmlLoader) {
@@ -206,16 +235,66 @@ public abstract class Controller {
         return new StageHolder<>(controller, stage, scene);
     }
 
-    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage, FXMLLoader fxmlLoader) {
-        return loadFxml(PageUtil.getLayoutPath(cls), stage, fxmlLoader);
+    public <T extends Controller> StageHolder<T> openPage(String path) {
+        return openPage(getUrl(path), new BaseStage(), new FXMLLoader(), (Object[]) null);
     }
 
-    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls, BaseStage stage) {
-        return loadFxml(cls, stage, new FXMLLoader());
+    public <T extends Controller> StageHolder<T> openPage(String path, BaseStage stage) {
+        return openPage(getUrl(path), stage, new FXMLLoader(), (Object[]) null);
     }
 
-    public <T extends Controller> StageHolder<T> loadFxml(Class<T> cls) {
-        return loadFxml(cls, new BaseStage(), new FXMLLoader());
+    public <T extends Controller> StageHolder<T> openPage(String path, BaseStage stage, FXMLLoader fxmlLoader) {
+        return openPage(getUrl(path), stage, fxmlLoader, (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(URL url) {
+        return openPage(url, new BaseStage(), new FXMLLoader(), (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(URL url, BaseStage stage) {
+        return openPage(url, stage, new FXMLLoader(), (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(Class<T> cls, BaseStage stage, FXMLLoader fxmlLoader) {
+        return openPage(getUrl(PageUtil.getLayoutPath(cls)), stage, fxmlLoader, (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(Class<T> cls, BaseStage stage, Object... args) {
+        return openPage(getUrl(PageUtil.getLayoutPath(cls)), stage, new FXMLLoader(), args);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(Class<T> cls, BaseStage stage) {
+        return openPage(getUrl(PageUtil.getLayoutPath(cls)), stage, new FXMLLoader(), (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(Class<T> cls, Object... args) {
+        return openPage(getUrl(PageUtil.getLayoutPath(cls)), new BaseStage(), new FXMLLoader(), args);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(Class<T> cls) {
+        return openPage(getUrl(PageUtil.getLayoutPath(cls)), new BaseStage(), new FXMLLoader(), (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(URL url, BaseStage stage, FXMLLoader fxmlLoader) {
+        return openPage(url, stage, fxmlLoader, (Object[]) null);
+    }
+
+    public <T extends Controller> StageHolder<T> openPage(URL url, BaseStage stage, FXMLLoader fxmlLoader, Object... args) {
+        StageHolder<T> holder = loadFxml(url, stage, fxmlLoader);
+        holder.getStage().show();
+        holder.getController().show();
+        if (args != null) {
+            holder.getController().onCommand(args);
+        }
+        return holder;
+    }
+
+    public <T extends Controller> FrameHolder<T> loadFrame(Pane root, Class<T> cls) {
+        return loadFrame(getStage(), root, cls, (Object[]) null);
+    }
+
+    public <T extends Controller> FrameHolder<T> loadFrame(Pane root, Class<T> cls, Object... args) {
+        return loadFrame(getStage(), root, cls, args);
     }
 
     public <T extends Controller> FrameHolder<T> loadFrame(BaseStage stage, Pane root, Class<T> cls) {
@@ -249,12 +328,63 @@ public abstract class Controller {
         if (controller != null) {
             controller.setScene(root.getScene());
             controller.setStage(stage);
-            controller.setPageParams(args);
             controller.setParent(this);
 
             controller.create();
+            controller.show();
+            if (args != null) {
+                controller.onCommand(args);
+            }
         }
 
-        return new FrameHolder<>(controller, stage, root.getScene());
+        return new FrameHolder<>(controller, stage, root.getScene(), frame);
+    }
+
+    public <T extends Controller> FrameHolder<T> switchFrame(Pane root, Class<T> cls) {
+        return switchFrame(getStage(), root, cls, (Object[]) null);
+    }
+
+    public <T extends Controller> FrameHolder<T> switchFrame(Pane root, Class<T> cls, Object... args) {
+        return switchFrame(getStage(), root, cls, args);
+    }
+
+    public <T extends Controller> FrameHolder<T> switchFrame(BaseStage stage, Pane root, Class<T> cls) {
+        return switchFrame(stage, root, cls, (Object[]) null);
+    }
+
+    public <T extends Controller> FrameHolder<T> switchFrame(BaseStage stage, Pane root, Class<T> cls, Object... args) {
+        Map<Class<? extends Controller>, FrameHolder> frameHolderMap = this.frameHolderMap.get(root);
+        if (frameHolderMap == null) {
+            frameHolderMap = new HashMap<>();
+            this.frameHolderMap.put(root, frameHolderMap);
+        }
+        FrameHolder<T> oldFrameHolder = currentFrameHolderMap.get(root);
+
+        FrameHolder<T> newFrameHolder = frameHolderMap.get(cls);
+        if (oldFrameHolder != null && newFrameHolder == oldFrameHolder) {
+            return oldFrameHolder;
+        }
+        if (oldFrameHolder != null) {
+            oldFrameHolder.getController().hide();
+        }
+        if (newFrameHolder != null) {
+            root.getChildren().clear();
+            root.getChildren().add(newFrameHolder.getFrame());
+            newFrameHolder.getController().show();
+            if (args != null) {
+                newFrameHolder.getController().onCommand(args);
+            }
+
+            currentFrameHolderMap.put(root, newFrameHolder);
+            return newFrameHolder;
+        }
+
+        newFrameHolder = loadFrame(stage, root, cls, args);
+        if (newFrameHolder != null) {
+            frameHolderMap.put(cls, newFrameHolder);
+            currentFrameHolderMap.put(root, newFrameHolder);
+        }
+
+        return newFrameHolder;
     }
 }

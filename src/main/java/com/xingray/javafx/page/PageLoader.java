@@ -8,9 +8,9 @@ import com.xingray.javafx.base.StageHolder;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -125,6 +125,10 @@ public class PageLoader {
     }
 
     public <T extends BaseController> FrameHolder<T> loadFrame(BaseStage stage, Pane root, Class<T> cls) {
+        return loadFrame(stage, root, cls, null);
+    }
+
+    public <T extends BaseController> FrameHolder<T> loadFrame(BaseStage stage, Pane root, Class<T> cls, Object... args) {
         URL resource = getUrl(getLayoutPath(cls));
         FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(resource);
@@ -140,11 +144,19 @@ public class PageLoader {
 
         root.getChildren().clear();
         root.getChildren().add(frame);
+        if (root instanceof AnchorPane) {
+            AnchorPane.setTopAnchor(frame, 0.0);
+            AnchorPane.setBottomAnchor(frame, 0.0);
+            AnchorPane.setLeftAnchor(frame, 0.0);
+            AnchorPane.setRightAnchor(frame, 0.0);
+        }
 
         T controller = fxmlLoader.getController();
         if (controller != null) {
             controller.setScene(root.getScene());
             controller.setStage(stage);
+            controller.setPageParams(args);
+
             controller.create();
         }
 

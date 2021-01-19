@@ -3,7 +3,7 @@ package com.xingray.javafx.base;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class StageHolder<T extends BaseController> {
+public class StageHolder<T extends Controller> {
     private final T controller;
     private final Stage stage;
     private final Scene scene;
